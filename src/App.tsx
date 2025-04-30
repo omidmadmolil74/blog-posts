@@ -1,15 +1,26 @@
 import MatchingPost from "./MatchingPost";
+import { setGlobalSearchParams } from "./utils";
 import "./App.css";
-import { useState } from "react";
-
-function App() {
+import { useEffect, useState } from "react";
+function initialParam(){
   const params = new URLSearchParams(window.location.search)
-  const newParam = params.get('query')
-  const [query, setQuery] = useState(newParam ?? '');
+  const newParam = params.get('query') ?? ''
+  return newParam
+}
+function App() {
+  useEffect(()=>{
+   const handleParam = ()=>{
+      setQuery(initialParam)
+    }
+    window.addEventListener('popstate' , handleParam)
+    return ()=> {
+      window.removeEventListener('popstate' , handleParam)
+    }
+  }, [])
+  const [query, setQuery] = useState(initialParam);
   const word = query.split(" ");
   const dogChecked = word.includes("dog");
   const catChecked = word.includes("cat");
-  
   const caterpillarChecked = word.includes("caterpillar");
   function handleCheck(tag: string, checked: boolean) {
     const newWords = checked ? [...word, tag] : word.filter((f) => f !== tag);
@@ -18,7 +29,7 @@ function App() {
 
   return (
     <>
-      <form className="mb-5">
+      <form className="mb-5" action={()=> setGlobalSearchParams({query})}>
         <div className="flex flex-col items-center pt-10">
           <input
             type="search"
